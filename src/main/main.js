@@ -1,12 +1,5 @@
-const {
-  app,
-  BrowserWindow,
-  Tray,
-  Menu,
-  nativeImage,
-  ipcMain,
-  dialog,
-} = require("electron");
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, dialog } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const { WebSocketServer } = require("ws");
 const Store = require("electron-store");
 const path = require("path");
@@ -403,6 +396,16 @@ app.whenReady().then(() => {
   createWindow();
   createTray();
   startWebSocketServer();
+
+  autoUpdater.checkForUpdatesAndNotify();
+
+  autoUpdater.on('update-downloaded', () => {
+    autoUpdater.quitAndInstall();
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('Auto-update error:', err);
+  });
 });
 
 app.on("window-all-closed", (e) => {
