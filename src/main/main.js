@@ -297,13 +297,13 @@ function gerarHTML(data, papel) {
 <meta charset="UTF-8">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: monospace; font-size: 11px; width: ${largura}; padding: 4mm; }
+  body { font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: 600; width: ${largura}; padding: 4mm; -webkit-font-smoothing: none; }
   @page { size: ${largura} auto; margin: 0; }
 </style>
 </head>
 <body>
   <div style="text-align:center;margin-bottom:4px">
-    <div style="font-weight:bold;font-size:14px">${data.lojaNome || "ALUPOM"}</div>
+    <div style="font-weight:bold;font-size:16px">${data.lojaNome || "ALUPOM"}</div>
     <div style="font-size:10px">COMANDA DE PEDIDO</div>
     <div style="border-top:1px dashed #000;margin:4px 0"></div>
   </div>
