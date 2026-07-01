@@ -242,6 +242,7 @@ function gerarHTML(data, papel) {
       <div><b>${item.quantidade}x</b> ${item.nomeProduto || item.titulo || ""}${item.ehBrinde ? " [BRINDE]" : ""}</div>
       ${item.tamanho ? `<div style="padding-left:12px">Tam: ${item.tamanho}</div>` : ""}
       ${(item.extras || []).map((e) => `<div style="padding-left:12px">+ ${e.nome}${e.preco > 0 ? ` (${fmtBRL(e.preco)})` : ""}</div>`).join("")}
+      ${(item.opcionais || []).map((op) => `<div style="padding-left:12px">${op.nome}: ${(op.escolhas || []).join(", ")}</div>`).join("")}
       ${item.observacao ? `<div style="padding-left:12px">OBS: ${item.observacao}</div>` : ""}
       <div style="text-align:right">
         ${
