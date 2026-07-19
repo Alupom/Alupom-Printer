@@ -235,14 +235,55 @@ function gerarHTML(data, papel) {
   const dataStr = agora.toLocaleDateString("pt-BR");
   const pedidoCurto = (data.pedidoId || "").substring(0, 6).toUpperCase();
 
+  const montarDetalhesItem = (item) => {
+    const qtd = item.quantidade || 1;
+    const linhasPagas = [];
+    const linhasGratis = [];
+
+    // Extras — agrupa por nome+preço
+    const extrasAgrupados = new Map();
+    (item.extras || []).forEach((e) => {
+      const chave = `${e.nome}|${e.preco}`;
+      const atual = extrasAgrupados.get(chave);
+      if (atual) atual.qtdUnidade += 1;
+      else extrasAgrupados.set(chave, { nome: e.nome, preco: e.preco || 0, qtdUnidade: 1 });
+    });
+    extrasAgrupados.forEach(({ nome, preco, qtdUnidade }) => {
+      const qtdTotal = qtdUnidade * qtd;
+      if (preco > 0) {
+        linhasPagas.push(`<div style="padding-left:12px;display:flex;justify-content:space-between"><span>+ ${nome} x${qtdTotal}</span><span>${fmtBRL(preco * qtdTotal)}</span></div>`);
+      } else {
+        linhasGratis.push(`<div style="padding-left:12px">${nome} x${qtdTotal}</div>`);
+      }
+    });
+
+    // Opcionais — separa escolhas pagas de gratuitas
+    (item.opcionais || []).forEach((grupo) => {
+      const escolhas = (grupo.escolhas || []).map((e) =>
+        typeof e === "string" ? { nome: e, preco: 0 } : { nome: e.nome, preco: e.preco || 0 }
+      );
+      const pagas = escolhas.filter((e) => e.preco > 0);
+      const gratis = escolhas.filter((e) => e.preco === 0);
+
+      pagas.forEach((e) => {
+        linhasPagas.push(`<div style="padding-left:12px;display:flex;justify-content:space-between"><span>+ ${e.nome} x${qtd}</span><span>${fmtBRL(e.preco * qtd)}</span></div>`);
+      });
+
+      if (gratis.length > 0) {
+        linhasGratis.push(`<div style="padding-left:12px">${grupo.nome} x${qtd}: ${gratis.map((e) => e.nome).join(", ")}</div>`);
+      }
+    });
+
+    return linhasPagas.join("") + linhasGratis.join("");
+  };
+
   const itensHTML = (data.itens || [])
     .map(
       (item) => `
     <div style="margin-bottom:4px">
       <div><b>${item.quantidade}x</b> ${item.nomeProduto || item.titulo || ""}${item.ehBrinde ? " [BRINDE]" : ""}</div>
       ${item.tamanho ? `<div style="padding-left:12px">Tam: ${item.tamanho}</div>` : ""}
-      ${(item.extras || []).map((e) => `<div style="padding-left:12px">+ ${e.nome}${e.preco > 0 ? ` (${fmtBRL(e.preco)})` : ""}</div>`).join("")}
-      ${(item.opcionais || []).map((op) => `<div style="padding-left:12px">${op.nome}: ${(op.escolhas || []).join(", ")}</div>`).join("")}
+      ${montarDetalhesItem(item)}
       ${item.observacao ? `<div style="padding-left:12px">OBS: ${item.observacao}</div>` : ""}
       <div style="text-align:right">
         ${
@@ -323,6 +364,15 @@ function gerarHTML(data, papel) {
     <span>TOTAL</span><span>${fmtBRL(data.total)}</span>
   </div>
   <div style="border-top:1px dashed #000;margin:4px 0"></div>
+  ${(() => {
+    const naEntrega = (data.metodoPagamento || "").toLowerCase().includes("entrega");
+    return `
+  <div style="border:2px solid #000;padding:5px;margin:4px 0;text-align:center">
+    <div style="font-weight:bold;font-size:13px">
+      ${naEntrega ? "★ PAGAMENTO NA ENTREGA ★" : "✓ PAGAMENTO JÁ REALIZADO"}
+    </div>
+  </div>`;
+  })()}
   <div><b>Pagamento:</b> ${data.metodoPagamento || ""}</div>
   ${enderecoHTML}
   ${data.observacao ? `<div style="border-top:1px dashed #000;margin:4px 0"></div><div><b>OBS PEDIDO:</b> ${data.observacao}</div>` : ""}
