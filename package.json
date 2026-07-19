@@ -1,6 +1,6 @@
 {
   "name": "alupom-print",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Alupom Print — Impressão automática de comandas",
   "main": "src/main/main.js",
   "scripts": {
@@ -26,7 +26,8 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "artifactName": "AlupomPrint-Setup.exe"
     },
     "mac": {
       "target": "dmg",
@@ -36,7 +37,8 @@
     "linux": {
       "target": "AppImage",
       "icon": "assets/icon.png",
-      "category": "Utility"
+      "category": "Utility",
+      "artifactName": "AlupomPrint.AppImage"
     },
     "nsis": {
       "oneClick": false,
