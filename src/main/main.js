@@ -277,27 +277,32 @@ function gerarHTML(data, papel) {
     return linhasPagas.join("") + linhasGratis.join("");
   };
 
+  const precoItemTexto = (item) => {
+    if (item.ehBrinde) return "GRÁTIS";
+    if (
+      item.cupomTipo &&
+      ["leve_2_pague_1", "leve_3_pague_2"].includes(item.cupomTipo) &&
+      item.subtotal !== undefined
+    ) {
+      return `${fmtBRL(item.subtotal)} (era ${fmtBRL((item.preco || 0) * (item.quantidade || 1))})`;
+    }
+    if (item.precoSemCupom && item.precoSemCupom !== item.preco) {
+      return `${fmtBRL(item.preco * (item.quantidade || 1))} (era ${fmtBRL(item.precoSemCupom * (item.quantidade || 1))})`;
+    }
+    return fmtBRL((item.preco || 0) * (item.quantidade || 1));
+  };
+
   const itensHTML = (data.itens || [])
     .map(
       (item) => `
     <div style="margin-bottom:4px">
-      <div><b>${item.quantidade}x</b> ${item.nomeProduto || item.titulo || ""}${item.ehBrinde ? " [BRINDE]" : ""}</div>
+      <div style="display:flex;justify-content:space-between">
+        <span><b>${item.quantidade}x</b> ${item.nomeProduto || item.titulo || ""}${item.ehBrinde ? " [BRINDE]" : ""}</span>
+        <span>${precoItemTexto(item)}</span>
+      </div>
       ${item.tamanho ? `<div style="padding-left:12px">Tam: ${item.tamanho}</div>` : ""}
       ${montarDetalhesItem(item)}
       ${item.observacao ? `<div style="padding-left:12px">OBS: ${item.observacao}</div>` : ""}
-      <div style="text-align:right">
-        ${
-          item.ehBrinde
-            ? "GRÁTIS"
-            : item.cupomTipo &&
-                ["leve_2_pague_1", "leve_3_pague_2"].includes(item.cupomTipo) &&
-                item.subtotal !== undefined
-              ? `${fmtBRL(item.subtotal)} (era ${fmtBRL((item.preco || 0) * (item.quantidade || 1))})`
-              : item.precoSemCupom && item.precoSemCupom !== item.preco
-                ? `${fmtBRL(item.preco * (item.quantidade || 1))} (era ${fmtBRL(item.precoSemCupom * (item.quantidade || 1))})`
-                : fmtBRL((item.preco || 0) * (item.quantidade || 1))
-        }
-      </div>
       ${
         item.cupomTipo && !item.ehBrinde
           ? `<div style="font-size:10px;color:#666">${

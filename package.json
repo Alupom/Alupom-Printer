@@ -1,6 +1,6 @@
 {
   "name": "alupom-print",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Alupom Print — Impressão automática de comandas",
   "main": "src/main/main.js",
   "scripts": {
