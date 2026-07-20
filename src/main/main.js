@@ -277,19 +277,31 @@ function gerarHTML(data, papel) {
     return linhasPagas.join("") + linhasGratis.join("");
   };
 
+  const totalOpcionaisPagos = (item) => {
+    let total = 0;
+    (item.opcionais || []).forEach((grupo) => {
+      (grupo.escolhas || []).forEach((e) => {
+        const preco = typeof e === "string" ? 0 : (e.preco || 0);
+        total += preco;
+      });
+    });
+    return total * (item.quantidade || 1);
+  };
+
   const precoItemTexto = (item) => {
     if (item.ehBrinde) return "GRÁTIS";
+    const opcTotal = totalOpcionaisPagos(item);
     if (
       item.cupomTipo &&
       ["leve_2_pague_1", "leve_3_pague_2"].includes(item.cupomTipo) &&
       item.subtotal !== undefined
     ) {
-      return `${fmtBRL(item.subtotal)} (era ${fmtBRL((item.preco || 0) * (item.quantidade || 1))})`;
+      return `${fmtBRL(item.subtotal - opcTotal)} (era ${fmtBRL((item.preco || 0) * (item.quantidade || 1) - opcTotal)})`;
     }
     if (item.precoSemCupom && item.precoSemCupom !== item.preco) {
-      return `${fmtBRL(item.preco * (item.quantidade || 1))} (era ${fmtBRL(item.precoSemCupom * (item.quantidade || 1))})`;
+      return `${fmtBRL(item.preco * (item.quantidade || 1) - opcTotal)} (era ${fmtBRL(item.precoSemCupom * (item.quantidade || 1) - opcTotal)})`;
     }
-    return fmtBRL((item.preco || 0) * (item.quantidade || 1));
+    return fmtBRL((item.preco || 0) * (item.quantidade || 1) - opcTotal);
   };
 
   const itensHTML = (data.itens || [])
